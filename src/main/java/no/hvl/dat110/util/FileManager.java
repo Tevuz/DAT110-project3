@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import no.hvl.dat110.chordoperations.ChordLookup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,18 +59,14 @@ public class FileManager {
 	
 	public void createReplicaFiles() {
 
+		// set a loop where size = numReplicas
 		for (int i = 0; i < Util.numReplicas; i++) {
+			// replicate by adding the index to filename
 			String replicaFilepath= this.filename + i;
+			// hash the replica
+			// store the hash in the replicafiles array.
 			replicafiles[i] = Hash.hashOf(replicaFilepath);
 		}
-	 	
-		// set a loop where size = numReplicas
-
-		// replicate by adding the index to filename
-		
-		// hash the replica
-		
-		// store the hash in the replicafiles array.
 	}
 	
     /**
@@ -82,26 +79,33 @@ public class FileManager {
     	// randomly appoint the primary server to this file replicas
     	Random rnd = new Random(); 							
     	int index = rnd.nextInt(Util.numReplicas-1);
-    	
-    	int counter = 0;
+
 	
     	// Task1: Given a filename, make replicas and distribute them to all active peers such that: pred < replica <= peer
     	
     	// Task2: assign a replica as the primary for this file. Hint, see the slide (project 3) on Canvas
     	
     	// create replicas of the filename
-    	
+		createReplicaFiles();
+
+		int counter;
 		// iterate over the replicas
-    	
-    	// for each replica, find its successor (peer/node) by performing findSuccessor(replica)
-    	
-    	// call the addKey on the successor and add the replica
-		
-		// implement a logic to decide if this successor should be assigned as the primary for the file
-    	
-    	// call the saveFileContent() on the successor and set isPrimary=true if logic above is true otherwise set isPrimary=false
-    	
-    	// increment counter
+		for (counter = 0; counter < Util.numReplicas; counter++) {
+			// for each replica, find its successor (peer/node) by performing findSuccessor(replica)
+			NodeInterface successor = chordnode.findSuccessor(replicafiles[counter]);
+
+			// call the addKey on the successor and add the replica
+			successor.addKey(replicafiles[counter]);
+
+			// implement a logic to decide if this successor should be assigned as the primary for the file
+			boolean isPrimary = counter == index;
+
+			// call the saveFileContent() on the successor and set isPrimary=true if logic above is true otherwise set isPrimary=false
+			successor.saveFileContent(filename, replicafiles[counter], bytesOfFile, isPrimary);
+
+			// increment counter
+		}
+
 		return counter;
     }
 	
