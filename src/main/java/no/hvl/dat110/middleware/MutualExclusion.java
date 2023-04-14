@@ -185,7 +185,7 @@ public class MutualExclusion {
 				// compare clocks, the lowest wins
 				// if clocks are the same, compare nodeIDs, the lowest wins
 
-				boolean senderWins = sender < receiver || (sender == receiver && message.getNodeID().compareTo(node.getNodeID()) <= 0);
+				boolean senderWins = sender < receiver || (sender == receiver && message.getNodeID().compareTo(node.getNodeID()) < 0);
 
 				if (senderWins) {
 					// if sender wins, acknowledge the message, obtain a stub and call onMutexAcknowledgementReceived()
